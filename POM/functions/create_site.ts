@@ -80,9 +80,16 @@ export const createSite = async (page: Page, config: SiteConfig) => {
 
             await page.getByText('Demo Site Create a demo site').click();
             await waitForAndClick(page, 'button', 'More Advanced Settings');
-
-            await selectOptionWithValidation(page.getByLabel('PHP Version'), config.php_version);
             
+            await page.getByLabel('PHP Version').click();
+            await page.waitForTimeout(5000);
+            if(await hasOption(page.getByLabel('PHP Version'), config.php_version))
+            {
+                await page.getByLabel('PHP Version').selectOption(config.php_version);
+            } else {
+                throw new Error(`Option "${option}" not found`);
+            }
+
             await waitForAndClick(page, 'button', 'Next');
 
             await page.waitForLoadState("domcontentloaded");
@@ -99,6 +106,7 @@ export const createSite = async (page: Page, config: SiteConfig) => {
 
             if (match) {
                 console.log(`Server ID: ${match[1]}, Site ID: ${match[2]}`);
+                console.log(`Progress Site: ${page.url()}`);
             } else {
                 console.log('No server or site ID match found');
             }
@@ -155,7 +163,9 @@ async function handlePostInstallation(page: Page) {
         ]);
 
         if (/.*site-overview/.test(page.url())) {
+
             console.log('WordPress site installation completed successfully.');
+            
         } else if (await wentWrongText.isVisible()) {
             await handleFailure();
         } else {
@@ -168,26 +178,15 @@ async function handlePostInstallation(page: Page) {
 }
 
 
-async function selectOptionWithValidation(element: Locator, option: string | string[]) {
-    try {
-        // Check if the option exists in the select element
-        const options = await element.evaluateAll((elms: HTMLOptionElement[]) => elms.map(option => option.value));
+async function hasOption(element: Locator, value: string): Promise<boolean> {
+    const options = await element.locator('option').all();  // Get all options inside the select element
 
-        if (Array.isArray(option)) {
-            // Check for multiple selections
-            const missingOptions = option.filter(opt => !options.includes(opt));
-            if (missingOptions.length > 0) {
-                throw new Error(`Options not found: ${missingOptions.join(', ')}`);
-            }
-        } else if (!options.includes(option)) {
-            throw new Error(`Option "${option}" not found`);
+    for (const option of options) {
+        const optionValue = await option.textContent('value'); // Get the value attribute
+        if (optionValue === value) {
+            return true; // Option found
         }
-
-        // Proceed with selection
-        await element.selectOption(option);
-        console.log(`Successfully selected option: ${option}`);
-    } catch (error) {
-        console.error(`Error selecting option: ${error.message}`);
-        throw error;
     }
+
+    return false; // Option not found
 }
