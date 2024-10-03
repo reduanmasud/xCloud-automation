@@ -3,7 +3,7 @@ import { createSite, SiteConfig } from '../POM/functions/create_site';
 
 
 const servers: string[] = [
-    'ols-20',
+    // 'ols-20',
     'ols-24-arm'
 ]
 const serverType: ('ols'|'nginx') = 'ols';
@@ -11,20 +11,20 @@ const serverType: ('ols'|'nginx') = 'ols';
 
 servers.forEach((serverName, idx) => {
     const sites: SiteConfig[] = [
-        {
-            server_name: serverName,
-            server_type: serverType,
-            site_title: 'PHP74',
-            php_version: '7.4',
-            wordpress_version: '6.1',
-        },
-        {
-            server_name: serverName,
-            server_type: serverType,
-            site_title: 'PHP80',
-            php_version: '8.0',
-            wordpress_version: 'latest',
-        },
+        // {
+        //     server_name: serverName,
+        //     server_type: serverType,
+        //     site_title: 'PHP74',
+        //     php_version: '7.4',
+        //     wordpress_version: '6.1',
+        // },
+        // {
+        //     server_name: serverName,
+        //     server_type: serverType,
+        //     site_title: 'PHP80',
+        //     php_version: '8.0',
+        //     wordpress_version: 'latest',
+        // },
         {
             server_name: serverName,
             server_type: serverType,

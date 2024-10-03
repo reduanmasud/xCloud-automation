@@ -1,5 +1,5 @@
+//@ts-nocheck
 import { expect, Locator, Page } from "@playwright/test";
-
 
 export type SiteConfig = {
     server_name: string;
@@ -9,35 +9,7 @@ export type SiteConfig = {
     wordpress_version: string;
 };
 
-export async function checkStep(page: Page, locatorElm: Locator): Promise<boolean> {
-    console.log(`Checking step for locator: ${locatorElm}`);
-
-    // Wait for the element to be visible before proceeding
-    await locatorElm.waitFor({ state: 'visible', timeout: 600000 });  // Increased timeout if needed
-
-
-    // Use locator.evaluate() to avoid the need for elementHandle()
-    const result = await locatorElm.evaluate((el) => {
-        const afterContent = window.getComputedStyle(el, '::after').getPropertyValue('content');
-        if (afterContent === '"\\e92b"') return 'success';
-        if (afterContent === '"\\e92a"') return 'failure';
-        return null;
-    });
-
-    if (result === 'success') {
-        console.log('Step succeeded.');
-        return true;
-    } else if (result === 'failure') {
-        console.error('Step failed!');
-        throw new Error('Step failed! Throwing exception...');
-    }
-
-    console.log('Unknown step result, continuing...');
-    return false; // Default case if result is neither 'success' nor 'failure'
-}
-
-type Role = "alert" | "alertdialog" | "application" | "article" | "banner" | "blockquote" | "button" | "caption" | "cell" | "checkbox" | "code" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "deletion" | "dialog" | "directory" | "document" | "emphasis" | "feed" | "figure" | "form" | "generic" | "grid" | "gridcell" | "group" | "heading" | "img" | "insertion" | "link" | "list" | "listbox" | "listitem" | "log" | "main" | "marquee" | "math" | "meter" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "none" | "note" | "option" | "paragraph" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "strong" | "subscript" | "superscript" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "time" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem";
-
+// Utility function to wait for and click on elements by role
 async function waitForAndClick(page: Page, role: Role, name: string | RegExp) {
     console.log(`Waiting for and clicking element with role: ${role}, name: ${name}`);
     const locator = page.getByRole(role, { name });
@@ -46,9 +18,31 @@ async function waitForAndClick(page: Page, role: Role, name: string | RegExp) {
     console.log(`Clicked element with role: ${role}, name: ${name}`);
 }
 
+// Function to check if a step succeeded or failed based on CSS pseudo-elements
+export async function checkStep(page: Page, locatorElm: Locator): Promise<boolean> {
+    console.log(`Checking step for locator: ${locatorElm}`);
+
+    await locatorElm.waitFor({ state: 'visible', timeout: 600000 }); // Increased timeout
+
+    const result = await locatorElm.evaluate((el) => {
+        const afterContent = window.getComputedStyle(el, '::after').getPropertyValue('content');
+        return afterContent === '"\\e92b"' ? 'success' : afterContent === '"\\e92a"' ? 'failure' : null;
+    });
+
+    if (result === 'success') {
+        console.log('Step succeeded.');
+        return true;
+    } else if (result === 'failure') {
+        console.error('Step failed!');
+        throw new Error('Step failed!');
+    }
+
+    console.log('Unknown step result.');
+    return false;
+}
+
+// Function to handle WordPress site creation
 export const createSite = async (page: Page, config: SiteConfig) => {
-
-
     await page.goto(`/`);
     await page.waitForURL(`/dashboard`);
 
@@ -56,21 +50,19 @@ export const createSite = async (page: Page, config: SiteConfig) => {
     await page.goto(`/server`);
     await page.waitForURL(`/server`);
 
-    // const serverGridLocator = page.locator('//main[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[position()]');
+    // Locate the servers grid and find matching server
     const serverGridLocator = page.getByRole('main').locator('div').filter({ hasText: 'All Servers All Web' }).nth(1);
     console.log(`Waiting for 'All Servers' heading`);
     await page.getByRole('heading', { name: 'All Servers' }).waitFor();
 
     const serverCount = await serverGridLocator.count();
-    const servers = await serverGridLocator.all();
-
-    console.log(`Server count: ${serverCount}`);
     if (serverCount === 0) {
         console.warn("No servers found.");
         return;
     }
 
-    console.log("Servers found, searching for the matching server...");
+    console.log(`Server count: ${serverCount}, searching for "${config.server_name}"...`);
+    const servers = await serverGridLocator.all();
     let foundServer = false;
 
     for (const server of servers) {
@@ -78,102 +70,40 @@ export const createSite = async (page: Page, config: SiteConfig) => {
         if (serverText.includes(config.server_name)) {
             foundServer = true;
             console.log(`Server "${config.server_name}" found, proceeding...`);
+
             await server.click();
             await page.getByRole('link', { name: config.server_name }).click();
 
             await waitForAndClick(page, 'link', /New Site/i);
-            console.log(`Installing new WordPress site...`);
             await page.getByText('Install New WordPress WebsiteSelect this option if you want to a create a fresh').click();
             await page.getByPlaceholder('Site Title').fill(config.site_title);
-            await page.getByText('Demo Site Create a demo site').click();
 
+            await page.getByText('Demo Site Create a demo site').click();
             await waitForAndClick(page, 'button', 'More Advanced Settings');
-            console.log(`Selecting PHP version: ${config.php_version}`);
-            await page.getByLabel('PHP Version').selectOption(config.php_version);
+
+            await selectOptionWithValidation(page.getByLabel('PHP Version'), config.php_version);
+            
             await waitForAndClick(page, 'button', 'Next');
+
             await page.waitForLoadState("domcontentloaded");
             await page.getByRole('heading', { name: 'Setting Up Your Site' }).waitFor();
-            // await page.getByRole('heading', { name: '100%' }).waitFor();
-            await page.waitForURL(/.*progress/)
+            await page.waitForURL(/.*progress/);
             await expect(page).toHaveURL(/.*progress/);
             await page.waitForLoadState('domcontentloaded');
 
-            // console.log(`Checking and verifying installation steps...`);
-            // for (let i = 1; i <= 16; i++) {
-            //     const stepText = `[${i}/16]`;
-            //     console.log(`Verifying step ${stepText}`);
-            //     await expect(checkStep(page, page.getByText(new RegExp(`\\[${i}\\/16\\].+(\\.{2,4})`, 'i')))).toBe(true);
-            // }
+            // Optional: Check installation progress steps
+            // ...
 
-            // Extract serverID and siteID using regex
             const regex = /server\/(\d+)\/site\/(\d+)/;
-            const match = await page.url().match(regex);
+            const match = page.url().match(regex);
 
             if (match) {
-                const serverID = match[1]; // '118'
-                const siteID = match[2];   // '394'
-
-                console.log(`Server ID: ${serverID}, Site ID: ${siteID}`);
-
+                console.log(`Server ID: ${match[1]}, Site ID: ${match[2]}`);
             } else {
-                console.log('No match found');
+                console.log('No server or site ID match found');
             }
 
-            const retryButton = page.getByRole('button', { name: 'Retry' });
-            const reportIssueButton = page.getByRole('button', { name: 'Report an issue' });
-            const wentWrongText = page.getByRole('heading', { name: 'Something went wrong' });
-
-            async function handleFailure() {
-                console.log("Something Went Wrong..");
-                console.log("Reloading Page");
-                await page.reload();
-
-                if (await retryButton.isVisible() && await reportIssueButton.isVisible()) {
-                    console.log("Retry Button Found.... Will retry");
-                    await retryButton.click();
-
-                    return await handleRace();
-                } else if (await retryButton.isHidden() && await reportIssueButton.isVisible()) {
-                    throw new Error('Failed to Create Site.');
-                }
-            }
-
-            async function handleRace() {
-                const waitForLocator = await Promise.race([
-                    page.waitForURL(/.*site-overview/, { timeout: 30 * 60 * 1000 }),
-                    wentWrongText.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 })
-                ]);
-                await page.waitForTimeout(10000);
-                await page.reload();
-                if (/.*site-overview/.test(page.url())) {
-                    console.log('WordPress site installation completed successfully.');
-                } else if (await wentWrongText.isVisible()) {
-                    console.log("Failed to create site: " + page.url());
-                    throw new Error('Failed to Create Site.');
-                }
-            }
-
-            try {
-                const waitForLocator = await Promise.race([
-                    page.waitForURL(/.*site-overview/, { timeout: 30 * 60 * 1000 }),
-                    retryButton.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 }),
-                    reportIssueButton.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 }),
-                    wentWrongText.waitFor({ state: 'visible' })
-                ]);
-
-                if (/.*site-overview/.test(page.url())) {
-                    console.log('WordPress site installation completed successfully.');
-                } else if (await wentWrongText.isVisible()) {
-                    await handleFailure();
-                } else {
-                    throw new Error('Failed to Create Site.');
-                }
-            } catch (error) {
-                console.log(error);
-                console.log("Failed to create site: " + page.url());
-                throw new Error('Failed to Create Site.');
-            }
-
+            await handlePostInstallation(page);
             break;
         }
     }
@@ -182,3 +112,82 @@ export const createSite = async (page: Page, config: SiteConfig) => {
         console.error(`Server "${config.server_name}" not found.`);
     }
 };
+
+// Helper function to handle post-installation scenarios
+async function handlePostInstallation(page: Page) {
+    const retryButton = page.getByRole('button', { name: 'Retry' });
+    const reportIssueButton = page.getByRole('button', { name: 'Report an issue' });
+    const wentWrongText = page.getByRole('heading', { name: 'Something went wrong' });
+
+    async function handleFailure() {
+        console.log("Something went wrong, reloading page...");
+        await page.reload();
+
+        if (await retryButton.isVisible() && await reportIssueButton.isVisible()) {
+            console.log("Retrying...");
+            await retryButton.click();
+            return await handleRaceCondition();
+        } else if (await retryButton.isHidden() && await reportIssueButton.isVisible()) {
+            throw new Error('Failed to create site.');
+        }
+    }
+
+    async function handleRaceCondition() {
+        const waitForLocator = await Promise.race([
+            page.waitForURL(/.*site-overview/, { timeout: 30 * 60 * 1000 }),
+            wentWrongText.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 })
+        ]);
+
+        if (/.*site-overview/.test(page.url())) {
+            console.log('WordPress site installation completed successfully.');
+        } else if (await wentWrongText.isVisible()) {
+            console.log("Site creation failed.");
+            throw new Error('Failed to create site.');
+        }
+    }
+
+    try {
+        const waitForLocator = await Promise.race([
+            page.waitForURL(/.*site-overview/, { timeout: 30 * 60 * 1000 }),
+            retryButton.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 }),
+            reportIssueButton.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 }),
+            wentWrongText.waitFor({ state: 'visible' })
+        ]);
+
+        if (/.*site-overview/.test(page.url())) {
+            console.log('WordPress site installation completed successfully.');
+        } else if (await wentWrongText.isVisible()) {
+            await handleFailure();
+        } else {
+            throw new Error('Failed to create site.');
+        }
+    } catch (error) {
+        console.log(`Error: ${error.message}`);
+        throw new Error('Failed to create site.');
+    }
+}
+
+
+async function selectOptionWithValidation(element: Locator, option: string | string[]) {
+    try {
+        // Check if the option exists in the select element
+        const options = await element.evaluateAll((elms: HTMLOptionElement[]) => elms.map(option => option.value));
+
+        if (Array.isArray(option)) {
+            // Check for multiple selections
+            const missingOptions = option.filter(opt => !options.includes(opt));
+            if (missingOptions.length > 0) {
+                throw new Error(`Options not found: ${missingOptions.join(', ')}`);
+            }
+        } else if (!options.includes(option)) {
+            throw new Error(`Option "${option}" not found`);
+        }
+
+        // Proceed with selection
+        await element.selectOption(option);
+        console.log(`Successfully selected option: ${option}`);
+    } catch (error) {
+        console.error(`Error selecting option: ${error.message}`);
+        throw error;
+    }
+}
