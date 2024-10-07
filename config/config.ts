@@ -3,3 +3,11 @@ export const baseConfig ={
     pass: 'Pass@#123',
     baseURL: 'https://s2.tmp1.dev',
 }
+
+
+export const hetznerAPI = {
+    name: '',
+    api: ''
+}
+
+
