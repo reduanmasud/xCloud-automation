@@ -72,7 +72,7 @@ export const createSite = async (page: Page, config: SiteConfig) => {
             console.log(`Server "${config.server_name}" found, proceeding...`);
 
             await server.click();
-            await page.getByRole('link', { name: config.server_name }).click();
+            await page.locator(`//a[text()='${config.server_name}' and contains(@href, '/sites')]`).click();
 
             await waitForAndClick(page, 'link', /New Site/i);
             await page.getByText('Install New WordPress WebsiteSelect this option if you want to a create a fresh').click();
@@ -134,9 +134,10 @@ async function handlePostInstallation(page: Page) {
         if (await retryButton.isVisible() && await reportIssueButton.isVisible()) {
             console.log("Retrying...");
             await retryButton.click();
+            await page.waitForTimeout(5000);
             return await handleRaceCondition();
         } else if (await retryButton.isHidden() && await reportIssueButton.isVisible()) {
-            throw new Error('Failed to create site.');
+            throw new Error('Failed to create site. x1');
         }
     }
 
@@ -150,7 +151,7 @@ async function handlePostInstallation(page: Page) {
             console.log('WordPress site installation completed successfully.');
         } else if (await wentWrongText.isVisible()) {
             console.log("Site creation failed.");
-            throw new Error('Failed to create site.');
+            throw new Error('Failed to create site. x2');
         }
     }
 
@@ -169,11 +170,11 @@ async function handlePostInstallation(page: Page) {
         } else if (await wentWrongText.isVisible()) {
             await handleFailure();
         } else {
-            throw new Error('Failed to create site.');
+            throw new Error('Failed to create site. x3');
         }
     } catch (error) {
         console.log(`Error: ${error.message}`);
-        throw new Error('Failed to create site.');
+        throw new Error('Failed to create site. x4');
     }
 }
 
