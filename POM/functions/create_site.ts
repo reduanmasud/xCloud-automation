@@ -89,6 +89,12 @@ export const createSite = async (page: Page, config: SiteConfig) => {
             } else {
                 throw new Error(`Option "${option}" not found`);
             }
+            
+            console.log(`Setting Wordpress verison to ${config.wordpress_version}...`);
+            await page.getByLabel('WordPress Version').click();
+            await page.waitForTimeout(3000);
+            await page.getByLabel('WordPress Version').selectOption(config.wordpress_version);
+            await page.waitForTimeout(2000);
 
             await waitForAndClick(page, 'button', 'Next');
 
@@ -132,6 +138,8 @@ async function handlePostInstallation(page: Page) {
         await page.reload();
 
         if (await retryButton.isVisible() && await reportIssueButton.isVisible()) {
+            console.log("Waiting for 5 second...");
+            await page.waitForTimeout(5000);
             console.log("Retrying...");
             await retryButton.click();
             await page.waitForTimeout(5000);
