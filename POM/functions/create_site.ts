@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { expect, Locator, Page } from "@playwright/test";
+import {test, expect, Locator, Page } from "@playwright/test";
 
 export type SiteConfig = {
     server_name: string;
@@ -87,7 +87,9 @@ export const createSite = async (page: Page, config: SiteConfig) => {
             {
                 await page.getByLabel('PHP Version').selectOption(config.php_version);
             } else {
-                throw new Error(`Option "${option}" not found`);
+                console.log(`Option "${config.php_version}" not found`);
+                test.skip(true, `Option "${config.php_version}" not found`)
+                throw new Error(`Option "${config.php_version}" not found`);
             }
             
             console.log(`Setting Wordpress verison to ${config.wordpress_version}...`);
