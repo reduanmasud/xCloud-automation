@@ -22,9 +22,9 @@ test('Start Up page', async ({page}) => {
     const description = "Launch a cloud hosting services business with xCloud Managed Servers. Resell our fully managed web hosting under your own brand or domain to maximize your revenue ensuring a reliable performance."
     const features = [
         "Complete control for your personal branding",
-        "Complete control for your personal branding", 
-        "Complete control for your personal branding", 
-        "Complete control for your personal branding"
+        "Manage your client billings with Stripe Connect", 
+        "Customize hosting packages & sell at your own price", 
+        "Get access to all powerful features of xCloud"
     ]
 
 
