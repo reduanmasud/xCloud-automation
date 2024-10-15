@@ -4,9 +4,7 @@ import { createSite, SiteConfig } from '../POM/functions/create_site';
 const serverType: ('ols'|'nginx') = 'nginx';
 
 const servers: string[] = [
-    'nginx-mysql',
-    'nginx-mariadb',
-    'nginx-arm-mysql'
+    'qa-test'
 ]
 
 

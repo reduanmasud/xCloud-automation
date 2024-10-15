@@ -3,9 +3,7 @@ import { createSite, SiteConfig } from '../POM/functions/create_site';
 
 
 const servers: string[] = [
-    'ubuntu-20',
-    'ubuntu-22',
-    'ubuntu-24',
+    'qa-ols',
     
 ]
 const serverType: ('ols'|'nginx') = 'ols';

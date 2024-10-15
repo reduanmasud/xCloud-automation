@@ -232,9 +232,13 @@ export class ServerManager {
                 await this.page.getByText('Choose region', { exact: true }).click();
                 await this.page.getByLabel('Choose region').selectOption({ label: server_region });
                 await expect(this.page.getByLabel('Server Size')).toBeVisible();
-                await this.page.locator('#database_type').click();
-                await this.page.waitForTimeout(4000);
-                await this.page.locator(".multiselect-option").filter({hasText: server_database}).click();
+
+                if(server_database === DBEngine.mariadb)
+                {
+                    await this.page.locator('#database_type').click();
+                    await this.page.waitForTimeout(1000);
+                    await this.page.locator(".multiselect-option").filter({hasText: server_database}).click();
+                }
                 //TODO: Tag need to implement
 
                 break;
@@ -268,16 +272,19 @@ export class ServerManager {
             }
         }
 
-        // if(understand_bill)
-        //     await this.page.locator('span').filter({ hasText: 'I have understood that the' }).first().click();
-    
-        // if(document_read)
-        //     await this.page.locator('span').filter({ hasText: 'I am sure that I\'ve read the' }).first().click();
-        // //await expect(this.page.)
-
-
-
-
+        await this.page.getByRole('button', { name: 'Next' }).click();
+        await this.page.waitForURL(/\/progress/);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.getByText(/\[1\/28]*./);
+        
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(10000000);
         this.servers.push(newServer as MultiProviderServer);
         return newServer;
     }
