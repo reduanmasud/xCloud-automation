@@ -40,7 +40,7 @@ test('Create Server in Vultr', async()=>{
             backup_enable:false,
             ip_doc: true,
             billing: true,
-            demo_server: true
+            // demo_server: true
         }
     )
 

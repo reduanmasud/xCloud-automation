@@ -273,19 +273,43 @@ export class ServerManager {
         }
 
         await this.page.getByRole('button', { name: 'Next' }).click();
+        await this.page.waitForLoadState('domcontentloaded');
+        await this.page.getByRole('heading', {name: 'Setting Up Your Server'}).waitFor();
+
         await this.page.waitForURL(/\/progress/);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.getByText(/\[1\/28]*./);
+        await expect(this.page).toHaveURL(/.*progress/);
+
+        const regx = /server\/(\d+)\/progress/;
+        const match = this.page.url().match(regx);
+        if(match) {
+            console.log(`Server ID: ${match[1]}`);
+            console.log(`Visit to check: ${this.page.url()}`);
+        } else {
+            console.log('No server found');
+
+        }
+
+        //Wait for any of the locator to show up
+        try {
+            
+
+            const waitForLocator = await Promise.race([
+                this.page.waitForURL(/.*sites/, { timeout: 30 * 60 * 1000 }),
+                this.page.getByRole('heading', { name: 'Something went wrong' }).waitFor({state: 'visible'}),
+            ])
+            console.log(waitForLocator);
+
+            if(/server\/(\d+)\/sites/.test(this.page.url())) {
+                console.log(`Server installstion successfull.`)
+                console.log(`Visit Server: ${this.page.url()}`)
+            } else if (await this.page.getByRole('heading', { name: 'Something went wrong' }).isVisible()) {
+                console.log(`Failed to create server`);
+                throw new Error('Failed to create server. x1');
+            }
+        } catch (e) {
+            throw new Error('Failed to create server. x2');
+        }
         
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(1000);
-        await this.page.waitForTimeout(10000000);
-        this.servers.push(newServer as MultiProviderServer);
         return newServer;
     }
 
