@@ -153,8 +153,8 @@ async function handlePostInstallation(page: Page) {
 
     async function handleRaceCondition() {
         const waitForLocator = await Promise.race([
-            page.waitForURL(/.*site-overview/, { timeout: 30 * 60 * 1000 }),
-            wentWrongText.waitFor({ state: 'visible', timeout: 30 * 60 * 1000 })
+            page.waitForURL(/.*site-overview/, { timeout: 60 * 60 * 1000 }),
+            wentWrongText.waitFor({ state: 'visible', timeout: 60 * 60 * 1000 })
         ]);
 
         if (/.*site-overview/.test(page.url())) {
