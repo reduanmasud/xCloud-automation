@@ -96,6 +96,14 @@ test("Test Menu Items", async()=>{
 })
 
 
+// TODO: While purchase from Landing page xCloud is visible. - https://d.pr/i/3WKfEP
+// TODO: Need to update xCloud from Server Provisioning time - https://d.pr/i/Ywb4kp
+// TODO: Need to remove xCloud form Recent Event Server Provisioning Event - https://d.pr/i/l2ugsY
+// TODO: xCloud is visible in Server Page, in info Too - https://d.pr/i/R8BDbU
+// TODO: xCloud Logo is visible in server page - https://d.pr/i/dzEFBX
+// TODO: Notification there is xCloud visible - https://d.pr/i/Z4hFSx
+// TODO: Server Logo and info has xCloud - https://d.pr/i/8Pimyv
+
 test(`Test Total Servers Count Card`, async() => {
     await expect(countCards.filter({hasText:/Total Servers/}).getByText(/Total Servers/).count()).toBe(2);
     await expect(countCards.filter({hasText:/Total Servers/}).locator('h3').allInnerTexts()).toMatch(/[0-9]+/)
