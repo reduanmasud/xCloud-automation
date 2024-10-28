@@ -1,7 +1,9 @@
+import { ClientSercet } from "./secrets";
+
 export const baseConfig ={
-    email: 'reduan@wpdeveloper.com',
-    pass: 'Pass@#123',
-    baseURL: 'https://staging.tmp1.dev',
+    email: ClientSercet.email,
+    pass: ClientSercet.password,
+    baseURL: 'https://whl8.reduanmasud.com',
 }
 
 
