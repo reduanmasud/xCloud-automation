@@ -154,7 +154,6 @@ links.forEach( link => {
 
             console.log(`Status: ${response.status()}`);
             console.log(page.url());
-            console.log(response.url());
             
             if(await page.url().includes(url) === false)
             {
