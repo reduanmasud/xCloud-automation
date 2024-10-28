@@ -1,7 +1,7 @@
 import { expect, Page } from "@playwright/test"
 import { waitForText } from "../helper_functions";
 
-enum ServerProvider {
+export enum ServerProvider {
     VULTR,
     HETZNER,
     GCP,

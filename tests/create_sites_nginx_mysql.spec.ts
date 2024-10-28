@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { createSite, SiteConfig } from '../POM/functions/create_site';
 
-
-const serverName = 'qa-nginx';
 const serverType: ('ols'|'nginx') = 'nginx';
 
+const servers: string[] = [
+    'ubuntu-20-nginx',
+    'ubuntu-24-nginx',
+    'ubuntu-22-nginx'
+]
 
+
+servers.forEach((serverName, idx) => {
 const sites: SiteConfig[] = [
     {
         server_name: serverName,
@@ -82,12 +87,12 @@ const sites: SiteConfig[] = [
 
 if(sites.length !== 0) {
     sites.forEach( (site, idx) => {
-        test(`Creating Site ${site.site_title} on environment ${site.server_type}`, async ({page})=>{
+        test(`Creating Site ${site.site_title} on environment ${site.server_type} at Server: ${serverName}`, async ({page})=>{
             await createSite(page, site);
         })
     })
 }
-
+});
 
 
 
