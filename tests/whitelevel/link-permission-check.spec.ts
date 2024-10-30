@@ -124,6 +124,10 @@ const links = [
     {
         link: "/user/team/create",
         isAccessible: false
+    },
+    {
+        link: "/api/payment_method/stripe/add",
+        isAccessible: true
     }
 
 

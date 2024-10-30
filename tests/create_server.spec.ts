@@ -16,17 +16,6 @@ test.afterAll(async () => {
 test('Create Server in Vultr', async()=>{
     const serverManager = await new ServerManager(page);
 
-    // await serverManager.createServer(
-    //     ServerProvider.VULTR,
-    //     vultrAPI,
-    //     'qa-test',
-    //     '1 vCPU / 1 GB RAM / 25 GB NVMe / 1 TB Bandwidth - $5/month',
-    //     'New Jersey - North America (US)',
-    //     DBEngine.mariadb,
-    //     ServerType.nginx,
-        
-    // )
-
     await serverManager.createServer(
         ServerProvider.VULTR,
         vultrAPI,
