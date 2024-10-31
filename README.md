@@ -31,6 +31,7 @@ export const xCloudUserSecret= {
     password: "password"
 }
 ```
+## Update the `config.ts` file accordingly too.
 
 ## Run your test
 
