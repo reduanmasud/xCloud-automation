@@ -10,6 +10,10 @@ const links = [
         isAccessible: true
     },
     {
+        link: "/site",
+        isAccessible: true
+    },
+    {
         link: "/site/create",
         isAccessible: true
     },
@@ -90,6 +94,10 @@ const links = [
         isAccessible: false
     },
     {
+        link: "/white-label/dashboard",
+        isAccessible: false
+    },
+    {
         link: "/server/create",
         isAccessible: false
     },
@@ -100,6 +108,10 @@ const links = [
     {
         link: "/credential/choose/vultr",
         isAccessible: false
+    },
+    {
+        link: "/user/storage-provider",
+        isAccessible: true
     },
     {
         link: "/credential/choose/digitalocean",
