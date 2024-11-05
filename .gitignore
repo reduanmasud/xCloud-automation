@@ -5,3 +5,4 @@ node_modules/
 /playwright/.cache/
 state.json
 /config/secrets.ts
+*-snapshots/*
