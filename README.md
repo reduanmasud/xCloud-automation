@@ -38,5 +38,5 @@ export const xCloudUserSecret= {
 ### Client Link Permission Test
 
 ```bash
-npx playwright test tests/whitelevel/link-permission-check.spec.ts --workers=5
+npx playwright test tests/whitelevel/link-permission-check.spec.ts --workers=5 --project=chromium
 ```
