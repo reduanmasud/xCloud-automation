@@ -5,7 +5,8 @@ const authFile = 'state.json';
 
 const baseURL = baseConfig.baseURL;
 const userEmail = baseConfig.email;
-const userPass = baseConfig.pass;
+const userPass = baseConfig.password;
+
 
 async function globalSetup(config: FullConfig) {
     const browser = await chromium.launch();
