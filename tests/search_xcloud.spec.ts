@@ -6,9 +6,7 @@ const url:string[] = [
 
 ]
 
-const baseURL = ''
-const userEmail = baseConfig.email
-const userPass = baseConfig.pass
+
 
 
 test("Test Test", async ({page}) => {
