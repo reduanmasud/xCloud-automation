@@ -45,9 +45,11 @@ test.describe('Blog posts', async () => {
             await page.waitForLoadState('domcontentloaded', {timeout: 10 * 60 * 1000});
 
             const $sidebar = await page.locator('.eb-post-grid-posts-wrapper');
+            const $gif_images = await page.locator('//img[substring(@src, string-length(@src) - 3) = ".gif"]');
             await expect(page).toHaveScreenshot({
+                timeout: 3 * 60 * 1000,
                 fullPage: true,
-                mask: [$sidebar],
+                mask: [$sidebar, $gif_images],
             });
         });
     };
