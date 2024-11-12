@@ -39,13 +39,13 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // {
-    //   name: 'blog',
-    //   use: {
-    //     ...devices['Desktop Chrome'],
-    //     // baseURL: 'xcloud.host'
-    //   }
-    // }
+    {
+      name: 'blog',
+      use: {
+        ...devices['Desktop Chrome'],
+        // baseURL: 'xcloud.host'
+      }
+    }
 
     // Commented out other browsers
     // {
