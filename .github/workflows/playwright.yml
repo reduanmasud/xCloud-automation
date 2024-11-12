@@ -8,6 +8,13 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      VULTR_API: ${{secrets.VULTR_API}}
+      STARTER_USER_EMAIL: ${{secrets.STARTER_USER_EMAIL}}
+      STARTER_USER_PASS: ${{secrets.STARTER_USER_PASS}}
+      STARTER_USER_BASE: ${{secrets.STARTER_USER_BASE}}
+      STARTER_USER_TEAM: ${{secrets.STARTER_USER_TEAM}}
+
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
