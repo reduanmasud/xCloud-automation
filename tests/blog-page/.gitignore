@@ -4,5 +4,4 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 state.json
-/config/secrets.ts
 *-snapshots/*
