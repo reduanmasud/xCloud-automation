@@ -87,6 +87,12 @@ test("Debug server deletion process", async ({ page }) => {
     console.log("- Confirmation text entered");
     console.log("- Ready for final deletion (button not clicked)");
 
+    // Final deletion button - commented out by default
+    // await page.getByRole('button', { name: 'Delete' }).click();
+    // console.log("✅ Clicked final delete button");
+    // await page.waitForLoadState('networkidle');
+    // console.log("✅ Server deletion completed");
+
     // Add Playwright debugger
     console.log("\n🔍 Pausing for debug inspection...");
     await page.pause();
