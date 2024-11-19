@@ -2,132 +2,98 @@ import { test, expect } from "@playwright/test";
 import { baseConfig } from "../config/config";
 
 const url: string[] = ["/server"];
+const targetIP = "5.75.161.167"; // Single IP to focus on
 
-// Enhanced selectors with more specific paths
-const selectors = {
-  serverContainer: ".xc-container-2 .relative.p-40px",
-  serverName: 'a[href^="/server/"]',
-  plusTagButton: "h6.text-base.text-primary-dark",
-  mainTag:
-    "span.text-base.tablet\\:text-sm.text-secondary-full.dark\\:text-mode-secondary-light.rounded-md",
-  ipAddress: ".tooltipWrapper span.cursor-pointer",
-  location: "span.fi-de",
-  serverType: '.tooltipWrapper:has-text("Self Managed")',
-  provisionStatus: "i.xcloud.xc-tick-o",
-  storage: '.text-sm:has-text("Storage") + span.text-xs',
-  ram: '.text-sm:has-text("Ram") + span.text-xs',
-  menuButton: "i.xcloud.xc-menu-vertical",
-  additionalTagsContainer:
-    ".tooltipWrapper.text-xs.cursor-pointer .tooltipContent span",
-} as const;
+test("Debug server deletion process", async ({ page }) => {
+  console.log("🚀 Starting server deletion debug process");
+  console.log(`🎯 Target IP: ${targetIP}`);
 
-interface ServerData {
-  name: string;
-  ipAddress: string;
-  location: string;
-  serverType: string;
-  storage: string;
-  ram: string;
-  status: string;
-  visibleTag: string;
-  additionalTags: string;
-  hasDeleteTag: boolean;
-}
-
-test("Navigate and analyze server page", async ({ page }) => {
   await page.goto(url[0]);
   await page.waitForLoadState("networkidle");
-  await expect(page).toHaveTitle(/Servers/);
+  console.log("✅ Navigated to server page");
 
   try {
-    await page.waitForSelector(selectors.serverContainer, {
-      state: "visible",
-      timeout: 10000,
-    });
+    // Wait for and verify server container
+    await page.waitForSelector(".xc-container-2 .relative.p-40px");
+    const container = page
+      .locator(".xc-container-2 .relative.p-40px")
+      .filter({
+        has: page.locator(
+          `.tooltipWrapper span.cursor-pointer:text("${targetIP}")`
+        ),
+      })
+      .first();
 
-    const serverContainers = page.locator(selectors.serverContainer);
-    const count = await serverContainers.count();
-    console.log(`Total number of servers found: ${count}`);
-
-    for (let i = 0; i < count; i++) {
-      const container = serverContainers.nth(i);
-      await container.waitFor({ state: "visible", timeout: 5000 });
-
-      // Get server name
-      const serverName =
-        (await container.locator(selectors.serverName).textContent()) ||
-        "Unknown";
-
-      // Get IP Address
-      const ipAddress =
-        (await container.locator(selectors.ipAddress).first().textContent()) ||
-        "No IP";
-
-      // Get Location
-      const location = await container
-        .locator(selectors.location)
-        .isVisible()
-        .then((visible) => (visible ? "DE" : "Unknown"));
-
-      // Get Server Type
-      const serverType =
-        (await container.locator(selectors.serverType).textContent()) ||
-        "Unknown Type";
-
-      // Get Status
-      const status = await container
-        .locator(selectors.provisionStatus)
-        .isVisible()
-        .then((visible) => (visible ? "Provisioned" : "Not Provisioned"));
-
-      // Get Resource Usage
-      const storage =
-        (await container.locator(selectors.storage).textContent()) ||
-        "Storage N/A";
-
-      const ram =
-        (await container.locator(selectors.ram).textContent()) || "RAM N/A";
-
-      // Get Tags
-      const visibleTag =
-        (await container.locator(selectors.mainTag).textContent()) || "";
-
-      // Handle Additional Tags
-      let additionalTags = "";
-      const plusTag = container.locator(selectors.plusTagButton);
-      if ((await plusTag.count()) > 0) {
-        await plusTag.hover();
-        await page.waitForTimeout(500);
-        additionalTags =
-          (await container
-            .locator(selectors.additionalTagsContainer)
-            .last()
-            .textContent()) || "";
-      }
-
-      // Check for delete tags
-      const hasDeleteTag =
-        additionalTags.toLowerCase().includes("delete") ||
-        visibleTag.toLowerCase().includes("delete");
-
-      // Log server information
-      console.log("\n=== Server Details ===");
-      console.log(`Name: ${serverName.trim()}`);
-      console.log(`IP Address: ${ipAddress.trim()}`);
-      console.log(`Location: ${location}`);
-      console.log(`Type: ${serverType.trim()}`);
-      console.log(`Status: ${status}`);
-      console.log(`Storage: ${storage.trim()}`);
-      console.log(`RAM: ${ram.trim()}`);
-      console.log(`Main Tag: ${visibleTag.trim()}`);
-      console.log(`Additional Tags: ${additionalTags.trim()}`);
-      console.log(`Has Delete Tag: ${hasDeleteTag}`);
-      console.log("=====================");
+    // Verify server exists
+    const exists = (await container.count()) > 0;
+    if (!exists) {
+      throw new Error(`❌ Server with IP ${targetIP} not found`);
     }
+    console.log("✅ Found target server container");
+
+    // Get server name for logging
+    const serverName = await container
+      .locator('a[href^="/server/"]')
+      .textContent();
+    console.log(`📝 Server name: ${serverName?.trim()}`);
+
+    // Click menu button
+    await container.locator("i.xcloud.xc-menu-vertical").click();
+    console.log("✅ Clicked menu button");
+    await page.waitForTimeout(500);
+
+    // Click delete option
+    await page.getByRole("menuitem", { name: "Delete Server" }).click();
+    console.log("✅ Clicked delete server option");
+
+    // Enable provider deletion
+    await page
+      .locator("label")
+      .filter({ hasText: "Enable this to delete this" })
+      .locator("span")
+      .first()
+      .click();
+    console.log("✅ Enabled provider deletion");
+
+    // Get confirmation text
+    const confirmLabel = await page
+      .getByText("Type", { exact: false })
+      .textContent();
+    const serverNameToConfirm = confirmLabel
+      ?.split("Type ")[1]
+      .split(" to confirm")[0];
+    console.log(`📝 Server name to confirm: ${serverNameToConfirm}`);
+
+    // Fill confirmation
+    const inputField = page.getByPlaceholder("Type server name to confirm");
+    await inputField.click();
+    await inputField.fill(serverNameToConfirm || "");
+    console.log("✅ Filled confirmation input");
+
+    // Verify confirmation text
+    const inputValue = await inputField.inputValue();
+    if (inputValue === serverNameToConfirm) {
+      console.log("✅ Confirmation text verified");
+    } else {
+      console.log("⚠️ Confirmation text mismatch");
+      console.log(`Expected: ${serverNameToConfirm}`);
+      console.log(`Got: ${inputValue}`);
+    }
+
+    console.log("\n🔍 Final Status:");
+    console.log("- Target IP found and selected");
+    console.log("- Delete modal opened");
+    console.log("- Provider deletion enabled");
+    console.log("- Confirmation text entered");
+    console.log("- Ready for final deletion (button not clicked)");
+
+    // Add Playwright debugger
+    console.log("\n🔍 Pausing for debug inspection...");
+    await page.pause();
   } catch (error) {
-    console.error("Error during test execution:", error);
+    console.error("\n❌ Error during deletion process:");
     if (error instanceof Error) {
-      console.error("Error message:", error.message);
+      console.error(`Error message: ${error.message}`);
     }
     throw error;
   }
