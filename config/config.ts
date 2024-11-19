@@ -1,6 +1,6 @@
 import { ClientSercet, xCloudUserSecret } from "./secrets";
 
-export const baseConfig = xCloudUserSecret;
+export const baseConfig = ClientSercet;
 
 
 

@@ -3,12 +3,17 @@ import { baseConfig } from "./config/config";
 
 const authFile = 'state.json';
 
-const baseURL = baseConfig.baseURL;
-const userEmail = baseConfig.email;
-const userPass = baseConfig.password;
+let baseURL = baseConfig.baseURL;
+let userEmail = baseConfig.email;
+let userPass = baseConfig.password;
 
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup(config: FullConfig, force?: { baseURL: string, userEmail: string, userPass: string }) {
+    if(force){
+        baseURL = force.baseURL;
+        userEmail = force.userEmail;
+        userPass = force.userPass; 
+    }
     const browser = await chromium.launch();
     const page = await browser.newPage();
     await page.goto(`${baseURL}/login`);
@@ -20,6 +25,7 @@ async function globalSetup(config: FullConfig) {
     await page.waitForURL(`${baseURL}/dashboard`);
     await page.context().storageState({ path: authFile });
     await browser.close();
+
 }
 
 export default globalSetup;
