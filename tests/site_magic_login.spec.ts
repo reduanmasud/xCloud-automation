@@ -73,7 +73,7 @@ test("Navigate to WordPress dashboard via Magic Login", async ({
       console.log("Successfully logged into WordPress dashboard");
     }
 
-    await newPage.pause();
+    // await newPage.pause();
   } catch (error) {
     console.error(
       `Operation failed: ${

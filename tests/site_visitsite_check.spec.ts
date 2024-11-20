@@ -89,7 +89,7 @@ test("Check site accessibility", async ({ page, context }) => {
     const pageTitle = await newPage.title();
     console.log(`Page Title: ${pageTitle}`);
 
-    await newPage.pause();
+    // await newPage.pause();
   } catch (error) {
     console.error(
       `Operation failed: ${
