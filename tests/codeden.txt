@@ -1,0 +1,18 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('https://staging.tmp1.dev/login');
+  await page.getByPlaceholder('Email Address..').click();
+  await page.getByPlaceholder('Email Address..').fill('arafat+staging1@wpdeveloper.com');
+  await page.getByPlaceholder('********').click();
+  await page.getByPlaceholder('********').fill('Arafat@123456');
+  await page.locator('span').filter({ hasText: 'Remember me' }).first().click();
+  await page.getByRole('button', { name: 'Log In' }).click();
+  await page.getByRole('link', { name: ' Sites' }).click();
+  await page.getByRole('button', { name: '' }).click();
+  await page.getByRole('menuitem', { name: 'Delete Site' }).click();
+  await page.getByText('Type testsite-adfk.x-cloud.').click();
+  await page.locator('span').filter({ hasText: 'Type testsite-adfk.x-cloud.' }).click();
+  await page.getByPlaceholder('Type site name to confirm').click();
+  await page.getByPlaceholder('Type site name to confirm').fill('testsite-adfk.x-cloud.app');
+});
