@@ -8,7 +8,7 @@ function getSiteNameFromURL(url: string): string {
 }
 
 const selectors = {
-  sitesGrid: "div[data-v-64177c1d] > .grid.grid-cols-4",
+  sitesGrid: ".xc-container-2  .grid.grid-cols-4",
   siteCard: ".relative.flex.flex-col.p-30px",
   dashboardLink: "a.inline-flex.items-center.text-dark[href^='/site/']",
   // New selectors for Magic Login
