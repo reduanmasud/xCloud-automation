@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Automation Test Server",
+    "ipAddress": "49.13.156.139",
+    "mainTag": "# not-demo-billing",
+    "additionalTags": "arafat, delete"
+  },
+  {
+    "name": "Test Server Arafat A..",
+    "ipAddress": "5.75.161.167",
+    "mainTag": "# arafat",
+    "additionalTags": "deleteit"
+  }
+]

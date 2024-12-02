@@ -1,0 +1,19 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('https://staging.tmp1.dev/login');
+  await page.getByPlaceholder('Email Address..').click();
+  await page.getByPlaceholder('Email Address..').fill('arafat+staging1@wpdeveloper.com');
+  await page.getByPlaceholder('********').click();
+  await page.getByPlaceholder('********').fill('Arafat@123456');
+  await page.getByRole('button', { name: 'Log In' }).click();
+  await page.getByRole('link', { name: ' Sites' }).click();
+  await page.getByRole('main').locator('div').filter({ hasText: 'All Sites Add New Site Sort' }).nth(1).click();
+  await page.getByRole('link', { name: 'testsite-adfk.x-clou..' }).click();
+  await page.getByRole('link', { name: 'testsite-adfk.x-clou..' }).click();
+  await page.getByText('IP Address 49.13.156.139Copy WordPress 6.7 PHP 8.1 Site User u1_testsite_adf').click();
+  const page1Promise = page.waitForEvent('popup');
+  await page.getByRole('link', { name: ' Magic Login' }).click();
+  const page1 = await page1Promise;
+  await page1.goto('https://testsite-adfk.x-cloud.app/wp-admin/');
+});
