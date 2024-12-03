@@ -4,33 +4,11 @@
 3. Goto Project Folder `cd xCloud-automation`
 4. run `npm i`
 
-## `secrets.ts` File
-```ts
-export const hetznerAPI = {
-    label: 'HetznerAPI',
-    api: ''
-}
+   
+## Configure `env` file
+## Setup `secrets.ts` File
+## Setup `config.ts` File
 
-export const vultrAPI = {
-    label: 'VULTR',
-    api_key: "TV6UJYRK............QECXBTJA"
-}
-
-export const ClientSercet= {
-    email: "example@email.com",
-    password: "password"
-}
-
-export const ResellerSecret= {
-    email: "example@email.com",
-    password: "password"
-}
-
-export const xCloudUserSecret= {
-    email: "example@email.com",
-    password: "password"
-}
-```
 ## Update the `config.ts` file accordingly too.
 
 ## Run your test
@@ -40,7 +18,10 @@ export const xCloudUserSecret= {
 ```bash
 npx playwright test tests/whitelevel/link-permission-check.spec.ts --workers=5 --project=chromium
 ```
-### Developer Documentation for Server and Site Management Classes
+
+
+
+# Developer Documentation for Server and Site Management Classes
 
 ---
 
