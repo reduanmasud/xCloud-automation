@@ -42,7 +42,7 @@ export class Site {
             
             this.name = optional.name;
             this.phpVersion = optional.phpVersion||null;
-            this.wpVersion = optional.wpVersion || null;
+            this.wpVersion = optional.wpVersion || 'latest';
             this.blueprint = optional.bluepring || false;
             this.fullPageCaching = optional.fullPageCaching || false;
             this.objectCaching = optional.objectCaching || false;
@@ -57,14 +57,14 @@ export class Site {
     public async provisionSite(): Promise<boolean>
     {
 
-        await this.page.goto('/');
-        await this.page.waitForURL('/dashbaord');
+        // await this.page.goto('/');
+        // await this.page.waitForURL(/\/dashbaord/);
 
         //TODO: Before Going to server do a Server Check
 
         //Goto Install WordPress Page
         const serverId = typeof this.server === 'string' ? this.server : this.server.getServerId();
-        let serverUrl = `/server/${serverId}/site/installWordpress`;
+        let serverUrl = `/server/${serverId}/site/installWordPress`;
         await this.page.goto(serverUrl);
         await this.page.waitForURL(serverUrl);
 
@@ -72,17 +72,28 @@ export class Site {
 
         //TODO: Need to add options for select Go Live Or Demo Site
         //Currently I am going for Demo Site Only
-
+        
         await this.page.getByText('Demo Site Create a demo site').click();
 
         //TODO: Condition for enabling multisite
 
         //TODO: Conditional Cacheing enable disable
+        if(this.fullPageCaching === false)
+            await this.page.locator('#enable_full_page_cache').locator('span').click();
+        if(this.objectCaching === false)
+            await this.page.locator('#enable_redis_object_cache').locator('span').click();
+
 
         //TODO: Email Provider Enable Disable
+        if(this.emailService === false)
+            await this.page.locator('#xcloud_default_email_provider').locator('span').click();
 
         //TODO: Blueprint Enable Disable
-
+        if (this.blueprint === false) {
+            await this.page.locator("xpath=//div[@class='flex wide-mobile:flex-wrap gap-2 items-center justify-between mb-4']").locator("label").click();
+        }
+        
+        await this.page.waitForTimeout(2000);
 
         const $moreAdvanceSettingsButton = this.page.getByRole('button', {name: /More Advanced Settings/} );
         await $moreAdvanceSettingsButton.waitFor();

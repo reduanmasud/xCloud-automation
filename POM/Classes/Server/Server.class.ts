@@ -106,7 +106,7 @@ export class Server {
         return false;
     }
 
-    async getServerId()
+    getServerId()
     {
         return this.serverId;
     }
@@ -142,12 +142,17 @@ export class Server {
         
     }
 
-
     // Private functions
     private async createVultrServer(credential)
     {
         // Setup VULTR api key each time..
         // TODO: Need to implement already saved password
+
+        // For now i am implementing new account every time insteade of saved password
+        const $chooseAccount = this.page.getByLabel('Select Existing or Connect New');
+        await $chooseAccount.selectOption({label: 'Connect New Account'})
+        await this.page.waitForTimeout(1000);
+
         await expect(this.page.getByText('Vultr Label')).toBeVisible();
         await this.page.getByPlaceholder('Label').pressSequentially(credential.label);
         await expect(this.page.getByText('Vultr API Key')).toBeVisible();
