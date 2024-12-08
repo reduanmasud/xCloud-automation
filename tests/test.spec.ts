@@ -1,13 +1,19 @@
 import { test, expect, type Page } from "@playwright/test";
 import { DBEngine, ServerManager, ServerProvider, ServerType } from "../POM/Classes/ServerManager.class";
 import { Server } from "../POM/Classes/Server/Server.class";
+import exp from "constants";
 let page: Page
 let server: Server;
+let vultr_server: Server;
+let hetzner_server: Server;
+let gcp_server: Server;
+let aws_server: Server;
 
 test.describe.configure({ mode: 'serial' });
 
 test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
+
     // server = await new Server(page,null, {
     //     name: 'qa-test-server',
     //     dbEnging: DBEngine.mysql,
@@ -23,11 +29,16 @@ test.beforeAll(async ({ browser }) => {
     //     }
     // })
 
-    server = await new Server(page,'179')
+    // server = await new Server(page,'2815')
+    // vultr_server = await Server(page, 'id');
+    // hetzner_server = await Server(page, 'id');
+    // gcp_server = await Server(page, 'id');
+    await server.loadData();
     
 });
 
 test.afterAll(async () => {
+    // vultr_server.changePhpVersion('8.4').apply();
     await page.close();
 });
 
@@ -39,9 +50,25 @@ test.afterAll(async () => {
     
 // });
 
-test('Create Site Test', async() => {
-    const i = await server.createSite('Test Site');
+test('Create Site Test hello-site', async() => {
+    const i = await server.createSite('hello-site');
     const site = server.sites[i - 1]; 
     expect(i).not.toBe(-1);
     expect(site.siteId).not.toBe('');
 })
+
+test('Create site demo-site', async() => {
+    const i = await server.createSite("demo-site");
+    const site = server.sites[i - 1]; 
+    expect(i).not.toBe(-1);
+    expect(site.siteId).not.toBe('');
+})
+
+
+// test('Server Delete Test', async()=>{
+//     await server.delete();
+//     await expect(true).toBe(true);
+// });
+
+
+

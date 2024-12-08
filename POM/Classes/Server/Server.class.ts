@@ -2,7 +2,16 @@ import { type Page, expect } from "@playwright/test"
 import { DBEngine, ServerProvider, ServerSize, ServerType } from "../ServerManager.class"
 import { Site } from "../Site/Site.class"
 import { vultrAPI } from "../../../config/secrets"
-
+type ServerStatusChange = {
+    event: string;
+    id: number;
+    status: string;
+    state: string;
+    redirect: string | null;
+};
+/**
+ * @type class
+ */
 export class Server {
     private page: Page;
     private name: string = '';
@@ -20,6 +29,24 @@ export class Server {
         billing?: boolean;
     };
     serverProvider: ServerProvider;
+
+    /**
+     * Constructs a Server instance.
+     * @param {Page} page - The Playwright `Page` instance for browser interaction.
+     * @param {string | null} [serverId=null] - The unique identifier for the server, if available, If u give id, no need to pass optional datas
+     * @param {object} [optional] - Optional configuration for the server.
+     * @param {ServerProvider} optional.serverProvider - The server provider (e.g., AWS, GCP).
+     * @param {string} optional.name - The name of the server.
+     * @param {DBEngine} optional.dbEnging - The database engine used by the server.
+     * @param {string} optional.size - The size or specification of the server.
+     * @param {string} optional.region - The hosting region for the server.
+     * @param {ServerType} optional.serverType - The type of server (e.g., production, staging).
+     * @param {object} [optional.options] - Additional options for server configuration.
+     * @param {boolean} [optional.options.backup_enable] - Indicates if backups are enabled.
+     * @param {boolean} [optional.options.demo_server] - Specifies if this is a demo server.
+     * @param {boolean} [optional.options.ip_doc] - Indicates if IP documentation is enabled.
+     * @param {boolean} [optional.options.billing] - Indicates if billing is enabled for this server.
+     */
     constructor(
         page: Page,
         serverId: string | null = null,
@@ -58,6 +85,11 @@ export class Server {
         }
     } 
 
+    /**
+     * Provisions a server based on the configured server provider.
+     * @returns {Promise<boolean>} - Resolves to `true` if the server is successfully provisioned, otherwise `false`.
+     * @throws {Error} - If an error occurs during server provisioning.
+     */
     async provisionServer(): Promise<boolean> {
         try {
             console.log(this.serverProvider);
@@ -106,12 +138,23 @@ export class Server {
         return false;
     }
 
+    /**
+     * Retrieves the server ID.
+     * @returns {string} - The unique server ID.
+     */
     getServerId()
     {
         return this.serverId;
     }
 
-
+    /**
+     * Creates and provisions a new site on the server.
+     * @param {string} name - The name of the site to create.
+     * @param {Object} [options] - Optional settings for the site.
+     * @param {string} [options.phpVersion] - The PHP version to use for the site.
+     * @param {string} [options.wpVersion] - The WordPress version to use for the site.
+     * @returns {Promise<number>} - Returns the total number of sites if successful, or -1 if provisioning fails.
+     */
     async createSite(
         name:string, 
         options?: { 
@@ -142,7 +185,101 @@ export class Server {
         
     }
 
-    // Private functions
+    async delete()
+    {
+        await this.page.goto(`server/${this.serverId}/sites`);
+        await this.page.getByRole('button', { name: 'Actions' }).click();
+        await this.page.getByRole('menuitem', { name: 'Delete Server' }).click();
+
+        const $deleteFromProvider = this.page.locator('label').filter({ hasText: 'Enable this to delete this' }).locator('span').nth(0); 
+        
+        if (await $deleteFromProvider.isVisible()) {
+            await $deleteFromProvider.click();
+        }
+
+        await this.page.getByPlaceholder('Type server name to confirm').click()
+        await this.page.getByPlaceholder('Type server name to confirm').pressSequentially(this.name);
+
+        await this.page.locator('footer').filter({ hasText: 'Delete' }).getByRole('button').click()
+        
+
+        // try {
+        //     await this.waitForServerDeletion();
+        //     console.log('Server deletion confirmed.');
+
+        // } catch (error){
+        //     console.error(`Error: ${error.message}`);
+        // }
+
+    }
+
+
+    // private async waitForServerDeletion() {
+    //     return new Promise<void>((resolve, reject) => {
+    //         // Set up a console event listener to log messages
+    //         this.page.on('console', (message) => {
+    //             // console.log(`[${message.type()}]: ${message.text()}`);
+    //             // You can also add checks here to see if the specific event indicates the server has been deleted
+    //             let e = this.parseEventText(message.text());
+    //             console.log(e);
+    //             if(e.event == "ServerStatusChanged" && e.state =="deletion_failed")
+    //             {
+    //                 resolve();
+    //                 //reject(new Error('Server Delation Failed'));
+    //             }
+
+    //         });
+    
+    //         // Set a timeout to avoid waiting indefinitely
+    //         setTimeout(() => {
+    //             reject(new Error('Timeout waiting for server deletion'));
+    //         }, 60000);  // Wait for 30 seconds max
+    //     });
+    // }
+    
+    
+    //Helper Function 
+    
+    
+    private parseEventText(inputString: string): ServerStatusChange {
+        // Regular expression to capture event name and key-value pairs
+        const eventRegex = /^(\w+)/; // Captures the event name (e.g., ServerStatusChanged)
+        const keyValueRegex = /(\w+): (\w+|null|\d+)/g; // Captures key-value pairs
+        
+        const eventMatch = inputString.match(eventRegex);
+        const eventName = eventMatch ? eventMatch[1] : 'UnknownEvent'; // Default to 'UnknownEvent' if not found
+        
+        let match;
+        const jsonObject: Partial<ServerStatusChange> = {}; // Use Partial for intermediate object
+    
+        // Extract key-value pairs from the input string
+        while ((match = keyValueRegex.exec(inputString)) !== null) {
+            const key = match[1];
+            const value = match[2] === 'null' ? null : isNaN(match[2]) ? match[2] : Number(match[2]);
+    
+            if (key === "id") {
+                jsonObject.id = value as number;
+            } else if (key === "status") {
+                jsonObject.status = value as string;
+            } else if (key === "state") {
+                jsonObject.state = value as string;
+            } else if (key === "redirect") {
+                jsonObject.redirect = value as string | null;
+            }
+        }
+    
+        jsonObject.event = eventName;  // Add the dynamic event name
+    
+        return jsonObject as ServerStatusChange;
+    }
+    
+    
+    
+    /**
+     * Connects to a Vultr account by selecting an existing account or adding a new one.
+     * @param {Object} credential - The credential object for the Vultr account.
+     * @throws Will throw an error if account verification fails.
+     */
     private async createVultrServer(credential)
     {
         // Setup VULTR api key each time..
@@ -268,4 +405,24 @@ export class Server {
 
     }
 
+    /**
+     * Loads server data by navigating to the server metadata page and extracting the server name.
+     * Updates the `name` property with the server's name if successfully retrieved.
+     * @throws Will log an error if the navigation or data extraction fails.
+     * @async
+     */
+    async loadData() {
+        if(this.serverId == null) return;
+        try {
+            await this.page.goto(`/server/${this.serverId}/meta`);
+            const $serverName = this.page
+                .locator('div')
+                .filter({ hasText: /^Server Name$/ })
+                .getByRole('textbox');
+            this.name = await $serverName.inputValue();
+        } catch (error) {
+            console.error('Failed to set server info:', error);
+        }
+    }
+    
 }
