@@ -160,10 +160,12 @@ export class Server {
         options?: { 
             phpVersion?: string, 
             wpVersion?: string,
+            fullObjectCaching?: boolean,
+            objectCaching?: boolean,
         } 
     ): Promise<number> {
         
-        const { phpVersion, wpVersion } = options || {};
+        const { phpVersion, wpVersion, fullObjectCaching, objectCaching } = options || {};
 
         const site = new Site(
             this.page,
@@ -173,6 +175,8 @@ export class Server {
                 name: name,
                 phpVersion: phpVersion,
                 wpVersion: wpVersion,
+                fullPageCaching: fullObjectCaching,
+                objectCaching: objectCaching
             }
         );
     
