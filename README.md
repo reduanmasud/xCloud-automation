@@ -67,7 +67,7 @@ Manages server-related operations, such as provisioning and maintaining server d
    Creates a new site on the server.
 
    ```typescript
-   async createSite(name: string, options?: { phpVersion?: string; wpVersion?: string; }): Promise<void>;
+   async createSite(name: string, options?: { phpVersion?: string; wpVersion?: string; fullObjectCache?: boolean; objectCache?: boolean }): Promise<void>;
    ```
 
 ---

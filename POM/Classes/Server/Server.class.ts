@@ -153,6 +153,8 @@ export class Server {
      * @param {Object} [options] - Optional settings for the site.
      * @param {string} [options.phpVersion] - The PHP version to use for the site.
      * @param {string} [options.wpVersion] - The WordPress version to use for the site.
+     * @param {boolean} [options.fullObjectCaching] - By default it is set to false, to enable set it true
+     * @param {boolean} [options.objectCaching] - By default it is set to false, to enable set it true
      * @returns {Promise<number>} - Returns the total number of sites if successful, or -1 if provisioning fails.
      */
     async createSite(
