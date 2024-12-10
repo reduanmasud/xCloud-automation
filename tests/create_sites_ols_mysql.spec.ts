@@ -3,9 +3,7 @@ import { createSite, SiteConfig } from '../POM/functions/create_site';
 
 
 const servers: string[] = [
-    'ubuntu-20-ols',
-    'ubuntu-22-ols',
-    'ubuntu-24-ols'
+    'qa-ols-mariadb',
     
 ]
 const serverType: ('ols'|'nginx') = 'ols';
@@ -46,6 +44,13 @@ servers.forEach((serverName, idx) => {
             server_type: serverType,
             site_title: 'PHP83',
             php_version: '8.3',
+            wordpress_version: 'latest',
+        },
+        {
+            server_name: serverName,
+            server_type: serverType,
+            site_title: 'PHP83',
+            php_version: '8.4',
             wordpress_version: 'latest',
         },
     

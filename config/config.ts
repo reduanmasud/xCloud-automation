@@ -1,7 +1,3 @@
-import { ClientSercet } from "./secrets";
+import { ClientSercet, xCloudUserSecret } from "./secrets";
 
-export const baseConfig = ClientSercet;
-
-
-
-
+export const baseConfig = xCloudUserSecret;

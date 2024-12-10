@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 import { baseConfig } from './config/config';
+import dotenv from 'dotenv';
+
+
+dotenv.config();
+
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -22,18 +27,25 @@ export default defineConfig({
   },
 
   projects: [
-    // { 
-    //   name: 'setup', 
-    //   testMatch: /global-setup\.ts/,
-    // },
+    { 
+      name: 'setup', 
+      testMatch: /global-setup\.ts/,
+    },
     {
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
         storageState: 'state.json',  // Reuse the auth state
       },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
+    // {
+    //   name: 'blog',
+    //   use: {
+    //     ...devices['Desktop Chrome'],
+    //     // baseURL: 'xcloud.host'
+    //   }
+    // }
 
     // Commented out other browsers
     // {
