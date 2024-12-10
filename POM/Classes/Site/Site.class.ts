@@ -5,7 +5,7 @@ export class Site {
     private name: string = '';
     private url: string = '';
     siteId: string = '';
-    private server: Server | string;
+    private server: Server;
     private phpVersion: string | null;
     private wpVersion: string | null;
     private blueprint: boolean = false;
@@ -17,7 +17,7 @@ export class Site {
 
     constructor(
         page: Page,
-        server: Server | string,
+        server: Server,
         siteId: string | null = null,
         optional?: { 
             name: string; 
@@ -52,7 +52,10 @@ export class Site {
         }
 
     } 
-
+    public async gotoSiteDashboard()
+    {
+            this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/site-overview`);
+    }
 
     public async provisionSite(): Promise<boolean>
     {
