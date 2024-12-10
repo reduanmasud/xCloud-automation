@@ -191,6 +191,12 @@ export class Server {
         
     }
 
+    getServerType()
+    {
+        return this.serverType;
+    }
+
+
     async delete()
     {
         await this.page.goto(`server/${this.serverId}/sites`);
@@ -418,7 +424,7 @@ export class Server {
      * @async
      */
     async loadData() {
-        if(this.serverId == null) return;
+        if(this.serverId == null) return this;
         try {
             await this.page.goto(`/server/${this.serverId}/meta`);
             const $serverName = this.page
@@ -426,9 +432,13 @@ export class Server {
                 .filter({ hasText: /^Server Name$/ })
                 .getByRole('textbox');
             this.name = await $serverName.inputValue();
+            return this;
         } catch (error) {
             console.error('Failed to set server info:', error);
         }
+
+        return this;
+
     }
     
 }
