@@ -22,68 +22,101 @@ const DEBUG = true;
 const log = (message: string) => DEBUG && console.log(`[DEBUG] ${message}`);
 
 // Site configurations
-const phpVersions = [
-  {
+// Nginx Configurations (commented)
+/*
+const phpConfigs = [
+  { 
     displayVersion: "PHP56Nginx",
     phpVersion: "5.6",
-    wordPressVersion: "latest",
+    wordPressVersion: "latest"
   },
-  {
+  { 
     displayVersion: "PHP70Nginx",
     phpVersion: "7.0",
-    wordPressVersion: "latest",
+    wordPressVersion: "latest"
   },
-  {
+  { 
     displayVersion: "PHP71Nginx",
     phpVersion: "7.1",
-    wordPressVersion: "latest",
+    wordPressVersion: "latest"
   },
-  {
+  { 
     displayVersion: "PHP72Nginx",
     phpVersion: "7.2",
-    wordPressVersion: "latest",
+    wordPressVersion: "latest"
   },
-  {
+  { 
     displayVersion: "PHP73Nginx",
     phpVersion: "7.3",
-    wordPressVersion: "latest",
+    wordPressVersion: "latest"
   },
-  {
+  { 
     displayVersion: "PHP74Nginx",
+    phpVersion: "7.4",
+    wordPressVersion: "latest"
+  },
+  { 
+    displayVersion: "PHP80Nginx",
+    phpVersion: "8.0",
+    wordPressVersion: "latest"
+  },
+  { 
+    displayVersion: "PHP81Nginx",
+    phpVersion: "8.1",
+    wordPressVersion: "latest"
+  },
+  { 
+    displayVersion: "PHP82Nginx",
+    phpVersion: "8.2",
+    wordPressVersion: "latest"
+  },
+  { 
+    displayVersion: "PHP83Nginx",
+    phpVersion: "8.3",
+    wordPressVersion: "latest"
+  },
+  { 
+    displayVersion: "PHP84Nginx",
+    phpVersion: "8.4",
+    wordPressVersion: "latest"
+  }
+];
+*/
+
+// OLS Configurations (active)
+const phpConfigs = [
+  {
+    displayVersion: "PHP74OLS",
     phpVersion: "7.4",
     wordPressVersion: "latest",
   },
   {
-    displayVersion: "PHP80Nginx",
+    displayVersion: "PHP80OLS",
     phpVersion: "8.0",
     wordPressVersion: "latest",
   },
   {
-    displayVersion: "PHP81Nginx",
+    displayVersion: "PHP81OLS",
     phpVersion: "8.1",
     wordPressVersion: "latest",
   },
   {
-    displayVersion: "PHP82Nginx",
+    displayVersion: "PHP82OLS",
     phpVersion: "8.2",
     wordPressVersion: "latest",
   },
   {
-    displayVersion: "PHP83Nginx",
+    displayVersion: "PHP83OLS",
     phpVersion: "8.3",
-    wordPressVersion: "latest",
-  },
-  {
-    displayVersion: "PHP84Nginx",
-    phpVersion: "8.4",
     wordPressVersion: "latest",
   },
 ];
 
 // Server configurations
 const serverConfigs: ServerConfigs = {
-  vultr: {
-    nginx: "2834",
+  aws: {
+    // nginx: "2831",  // Uncomment for Nginx testing
+    ols: "2836", // Comment out for Nginx testing
   },
 };
 
@@ -97,10 +130,10 @@ test.describe("PHP Version Site Creation Tests", () => {
     await page.waitForLoadState("domcontentloaded");
     log("Browser page created");
 
-    // Initialize server once for all tests
-    server = new Server(page, serverConfigs.vultr.nginx);
+    // Initialize server
+    server = new Server(page, serverConfigs.aws.ols); // Change to .nginx for Nginx testing
     await server.loadData();
-    log(`Server loaded with ID: ${serverConfigs.vultr.nginx}`);
+    log(`AWS OLS Server loaded with ID: ${serverConfigs.aws.ols}`);
   });
 
   test.afterAll(async () => {
@@ -108,34 +141,26 @@ test.describe("PHP Version Site Creation Tests", () => {
     await page.close();
   });
 
-  // Create separate test for each PHP version
-  for (const phpConfig of phpVersions) {
-    test(`Creating site with ${phpConfig.displayVersion}`, async () => {
-      log(`Starting creation of ${phpConfig.displayVersion}`);
+  // Create test for each PHP version
+  for (const config of phpConfigs) {
+    test(`Creating site with ${config.displayVersion}`, async () => {
+      log(`Starting creation of ${config.displayVersion}`);
       await page.waitForLoadState("domcontentloaded");
 
       try {
-        const result = await server.createSite(phpConfig.displayVersion, {
-          phpVersion: phpConfig.phpVersion,
-          wpVersion: phpConfig.wordPressVersion,
+        const result = await server.createSite(config.displayVersion, {
+          phpVersion: config.phpVersion,
+          wpVersion: config.wordPressVersion,
           fullObjectCaching: true,
           objectCaching: true,
         });
 
-        // Verify the result
         expect(result).toBeTruthy();
-        log(`Successfully created site ${phpConfig.displayVersion}`);
-
-        // Wait for any remaining page loads
+        log(`Successfully created site ${config.displayVersion}`);
         await page.waitForLoadState("networkidle");
-
-        // Additional verification if needed
-        // if (await page.locator('text="WordPress site installation completed successfully"').isVisible()) {
-        //   log(`Verified site ${phpConfig.displayVersion} is created successfully`);
-        // }
       } catch (e) {
-        log(`Warning: Issue with site ${phpConfig.displayVersion}: ${e}`);
-        test.fail(); // Mark test as failed but continue with others
+        log(`Warning: Issue with site ${config.displayVersion}: ${e}`);
+        test.fail();
       }
     });
   }
