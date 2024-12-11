@@ -58,7 +58,7 @@ test('Create Site Test hello-site', async() => {
 })
 
 test('Create site demo-site', async() => {
-    const i = await server.createSite("demo-site");
+    const i = await server.createSite("demo-site",{fullObjectCaching:true,objectCaching:true,phpVersion:"8.2",wpVersion:"6.4"});
     const site = server.sites[i - 1]; 
     expect(i).not.toBe(-1);
     expect(site.siteId).not.toBe('');
