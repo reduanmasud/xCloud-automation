@@ -22,84 +22,121 @@ const DEBUG = true;
 const log = (message: string) => DEBUG && console.log(`[DEBUG] ${message}`);
 
 // Site configurations
-const nginxSites = [
+const phpVersions = [
+  {
+    displayVersion: "PHP56Nginx",
+    phpVersion: "5.6",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP70Nginx",
+    phpVersion: "7.0",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP71Nginx",
+    phpVersion: "7.1",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP72Nginx",
+    phpVersion: "7.2",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP73Nginx",
+    phpVersion: "7.3",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP74Nginx",
+    phpVersion: "7.4",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP80Nginx",
+    phpVersion: "8.0",
+    wordPressVersion: "latest",
+  },
   {
     displayVersion: "PHP81Nginx",
     phpVersion: "8.1",
     wordPressVersion: "latest",
   },
+  {
+    displayVersion: "PHP82Nginx",
+    phpVersion: "8.2",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP83Nginx",
+    phpVersion: "8.3",
+    wordPressVersion: "latest",
+  },
+  {
+    displayVersion: "PHP84Nginx",
+    phpVersion: "8.4",
+    wordPressVersion: "latest",
+  },
 ];
-
-const olsSites = [];
 
 // Server configurations
 const serverConfigs: ServerConfigs = {
   vultr: {
-    nginx: "2808",
+    nginx: "2834",
   },
 };
 
 let page;
+let server;
 
-// Main test suite
-test("Site Creation Tests", async ({ browser }) => {
-  const servers: { [key: string]: Server } = {};
+test.describe("PHP Version Site Creation Tests", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    page = await context.newPage();
+    await page.waitForLoadState("domcontentloaded");
+    log("Browser page created");
 
-  // Setup
-  const context = await browser.newContext();
-  page = await context.newPage();
-  await page.waitForLoadState("domcontentloaded");
-  log("Browser page created");
+    // Initialize server once for all tests
+    server = new Server(page, serverConfigs.vultr.nginx);
+    await server.loadData();
+    log(`Server loaded with ID: ${serverConfigs.vultr.nginx}`);
+  });
 
-  // Initialize servers
-  for (const [provider, config] of Object.entries(serverConfigs)) {
-    if (config.nginx) {
-      const serverKey = `${provider}Nginx`;
-      servers[serverKey] = new Server(page, config.nginx);
-      await servers[serverKey].loadData();
-      log(`${serverKey} server loaded with ID: ${config.nginx}`);
-    }
-  }
+  test.afterAll(async () => {
+    log("Closing browser");
+    await page.close();
+  });
 
-  // Create sites
-  for (const [serverKey, server] of Object.entries(servers)) {
-    const serverType = serverKey.includes("Nginx") ? "nginx" : "ols";
-    if (serverType === "nginx") {
-      for (const site of nginxSites) {
-        log(`Creating site ${site.displayVersion} on ${serverKey}`);
-        await page.waitForLoadState("domcontentloaded");
+  // Create separate test for each PHP version
+  for (const phpConfig of phpVersions) {
+    test(`Creating site with ${phpConfig.displayVersion}`, async () => {
+      log(`Starting creation of ${phpConfig.displayVersion}`);
+      await page.waitForLoadState("domcontentloaded");
 
-        try {
-          const result = await server.createSite(site.displayVersion, {
-            phpVersion: site.phpVersion,
-            wpVersion: site.wordPressVersion,
-            fullObjectCaching: true,
-            objectCaching: true,
-          });
+      try {
+        const result = await server.createSite(phpConfig.displayVersion, {
+          phpVersion: phpConfig.phpVersion,
+          wpVersion: phpConfig.wordPressVersion,
+          fullObjectCaching: true,
+          objectCaching: true,
+        });
 
-          // Verify the result
-          expect(result).toBeTruthy();
-          log(`Successfully created site ${site.displayVersion}`);
+        // Verify the result
+        expect(result).toBeTruthy();
+        log(`Successfully created site ${phpConfig.displayVersion}`);
 
-          // Wait for any remaining page loads
-          await page.waitForLoadState("networkidle");
-        } catch (e) {
-          log(`Failed to create site: ${e}`);
-          // Don't throw error if site creation was actually successful
-          if (
-            !(await page
-              .locator(
-                'text="WordPress site installation completed successfully"'
-              )
-              .isVisible())
-          ) {
-            throw new Error("Site creation failed");
-          }
-        }
+        // Wait for any remaining page loads
+        await page.waitForLoadState("networkidle");
+
+        // Additional verification if needed
+        // if (await page.locator('text="WordPress site installation completed successfully"').isVisible()) {
+        //   log(`Verified site ${phpConfig.displayVersion} is created successfully`);
+        // }
+      } catch (e) {
+        log(`Warning: Issue with site ${phpConfig.displayVersion}: ${e}`);
+        test.fail(); // Mark test as failed but continue with others
       }
-    }
+    });
   }
-
-  // Cleanup
-  await context.close();
 });
