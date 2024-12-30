@@ -16,7 +16,7 @@ test.afterAll(async () => {
 
 
 test('Dashboard Menu Test', async() => {
-    page.goto('/dashboard');
+    page.goto('/server');
     const navMenu = page.locator("//div[@class='xc-container !h-full flex !flex-row']");
 
     await expect(navMenu.getByText('Dashboard')).toBeVisible();
@@ -28,20 +28,20 @@ test('Dashboard Menu Test', async() => {
 })
 
 
-test('Dashboard Image Test', async() => {
+test('Server Image Test', async() => {
     await expect(page.getByRole('img', { name: 'empty_dashboard' })).toBeVisible();
 })
 
-test('Dashboard Text Test', async() => {
-    await expect(page.getByText('Check our Documentation to get a quick start.')).toBeVisible();
+test('Server Text Test', async() => {
+    await expect(page.getByText('Hey there! You have no server yet.')).toBeVisible();
+    await expect(page.getByText('Check out our Quick Start Documentation.')).toBeVisible();
 })
 
-test('Dashboard page button test', async() => {
-    await expect(page.getByRole('link', { name: /Add New/ })).toBeVisible();
+test('Server page button test', async() => {
     await expect(page.getByRole('link', { name: /Try xCloud Playground/ })).toBeVisible();
 });
 
 
-test('Dashboard Page Footer Test', async() => {
+test('Server Page Footer Test', async() => {
     await expect(page.getByText('xCloud Copyright © 2024 | xCloud Hosting LLC. All rights reserved.')).toBeVisible();
 })
