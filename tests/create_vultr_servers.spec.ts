@@ -21,7 +21,6 @@ test.afterAll(async () => {
     await page.close();
 });
 
-
 test.describe('Creating Nginx Sites', () => {
     let nginxServer: Server;
 

@@ -335,7 +335,15 @@ export class Site {
     }
 
     public async delete(page: Page) {
+        await page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/settings`);
+        await page.waitForURL(/.*settings/);
+        await page.waitForLoadState('domcontentloaded');
 
+        await page.getByRole('button', {name: 'Delete Site'}).click();
+        await page.waitForTimeout(2000);
+
+        await page.getByPlaceholder('Type site name to confirm').fill(this.name);
+        await page.getByRole('button', {name: 'Delete'}).click();
     }
 
 
