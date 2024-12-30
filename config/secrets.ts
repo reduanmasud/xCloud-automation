@@ -33,4 +33,12 @@ export const xCloudUserSecret= {
 }
 
 
+export const xCloudUserSecretS1 = {
+    email: process.env.STARTER_USER_EMAIL || '', 
+    password: process.env.STARTER_USER_PASS || '',
+    baseURL:  process.env.STARTER_USER_BASE || '',
+    team: process.env.STARTER_USER_TEAM || '',
+}
+
+
 
