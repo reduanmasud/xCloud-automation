@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import exp from "constants";
 import { baseConfig } from "../../config/config";
 
 test.describe.configure({ mode: 'serial' });
@@ -14,7 +15,7 @@ test.afterAll(async () => {
 });
 
 
-test('Site Page Menu Test', async() => {
+test('Dashboard Menu Test', async() => {
     page.goto('/server');
     const navMenu = page.locator("//div[@class='xc-container !h-full flex !flex-row']");
 
@@ -27,24 +28,24 @@ test('Site Page Menu Test', async() => {
 })
 
 
-test('Site Page Image Test', async() => {
+test('Server Image Test', async() => {
     await expect(page.getByRole('img', { name: 'empty_dashboard' })).toBeVisible();
 })
 
-test('Site Page Text Test', async() => {
+test('Server Text Test', async() => {
     await expect(page.getByText('Hey there! You have no server yet.')).toBeVisible();
     await expect(page.getByText('Check out our Quick Start Documentation.')).toBeVisible();
 })
 
-test('Site page button test', async() => {
-    await expect(page.getByRole('link', { name: /Add New Site/ })).toBeVisible();
+test('Server page button test', async() => {
+    await expect(page.getByRole('link', { name: /Add New server/ })).toBeVisible();
 });
 
-test('Site page Quick Start link test', async() => {
-    const $link = page.getByRole('link', { name: 'Quick Start' })
+test('Server page Quick Start Documentation link test', async() => {
+    const $link = page.getByRole('link', { name: 'Quick Start Documentation' })
     await expect($link).toHaveAttribute('href', 'https://xcloud.host/docs/how-to-get-free-hosting-with-vultr/');
 })
 
 test('Server Page Footer Test', async() => {
-    await expect(page.getByText('xCloud Copyright © 2024 | xCloud Hosting LLC. All rights reserved.')).toBeVisible();
+    await expect(page.getByText(/xCloud v\d+\.\d+\.\d+ Copyright © 2024 \| xCloud Hosting LLC\. All rights reserved\./)).toBeVisible();
 })

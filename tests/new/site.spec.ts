@@ -1,5 +1,4 @@
 import { test, expect, type Page } from "@playwright/test";
-import exp from "constants";
 import { baseConfig } from "../../config/config";
 
 test.describe.configure({ mode: 'serial' });
@@ -15,8 +14,8 @@ test.afterAll(async () => {
 });
 
 
-test('Dashboard Menu Test', async() => {
-    page.goto('/dashboard');
+test('Site Page Menu Test', async() => {
+    page.goto('/site');
     const navMenu = page.locator("//div[@class='xc-container !h-full flex !flex-row']");
 
     await expect(navMenu.getByText('Dashboard')).toBeVisible();
@@ -28,25 +27,24 @@ test('Dashboard Menu Test', async() => {
 })
 
 
-test('Dashboard Image Test', async() => {
+test('Site Page Image Test', async() => {
     await expect(page.getByRole('img', { name: 'empty_dashboard' })).toBeVisible();
 })
 
-test('Dashboard Text Test', async() => {
-    await expect(page.getByText('Check our Documentation to get a quick start.')).toBeVisible();
+test('Site Page Text Test', async() => {
+    await expect(page.getByText('Hey there! You have no site yet.')).toBeVisible();
+    await expect(page.getByText('Check out our Quick Start Documentation.')).toBeVisible();
 })
 
-test('Dashboard page button test', async() => {
-    await expect(page.getByRole('link', { name: /Add New/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Try xCloud Playground/ })).toBeVisible();
+test('Site page button test', async() => {
+    await expect(page.getByRole('link', { name: /Add New Site/ })).toBeVisible();
 });
 
-test('Dashboard page Documentation link test', async() => {
-    const $link = page.getByRole('link', { name: 'Documentation' })
+test('Site page Quick Start link test', async() => {
+    const $link = page.getByRole('link', { name: 'Quick Start' })
     await expect($link).toHaveAttribute('href', 'https://xcloud.host/docs/how-to-get-free-hosting-with-vultr/');
 })
 
-
-test('Dashboard Page Footer Test', async() => {
-    await expect(page.getByText('xCloud Copyright © 2024 | xCloud Hosting LLC. All rights reserved.')).toBeVisible();
+test('Server Page Footer Test', async() => {
+    await expect(page.getByText(/xCloud v\d+\.\d+\.\d+ Copyright © 2024 \| xCloud Hosting LLC\. All rights reserved\./)).toBeVisible();
 })
