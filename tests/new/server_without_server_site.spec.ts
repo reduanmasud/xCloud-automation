@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import exp from "constants";
-import { baseConfig } from "../config/config";
+import { baseConfig } from "../../config/config";
 
 test.describe.configure({ mode: 'serial' });
 
@@ -41,6 +41,10 @@ test('Server page button test', async() => {
     await expect(page.getByRole('link', { name: /Try xCloud Playground/ })).toBeVisible();
 });
 
+test('Server page Quick Start Documentation link test', async() => {
+    const $link = page.getByRole('link', { name: 'Quick Start Documentation' })
+    await expect($link).toHaveAttribute('href', 'https://xcloud.host/docs/how-to-get-free-hosting-with-vultr/');
+})
 
 test('Server Page Footer Test', async() => {
     await expect(page.getByText('xCloud Copyright © 2024 | xCloud Hosting LLC. All rights reserved.')).toBeVisible();
