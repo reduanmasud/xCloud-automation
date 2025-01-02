@@ -1,11 +1,17 @@
 import { type Page, expect, Locator, test } from "@playwright/test";
 import { Server } from "../Server/Server.class";
+export enum PageStatus {
+    OK = "OK",
+    NOT_FOUND = "NOT_FOUND",
+    PERMISSION_ERROR = "PERMISSION_ERROR",
+    SERVER_ERROR = "SERVER_ERROR"
+}
 
 export class Site {
     private name: string = '';
     private url: string = '';
     siteId: string = '';
-    private server: Server | string;
+    private server: Server;
     private phpVersion: string | null;
     private wpVersion: string | null;
     private blueprint: boolean = false;
@@ -17,7 +23,7 @@ export class Site {
 
     constructor(
         page: Page,
-        server: Server | string,
+        server: Server,
         siteId: string | null = null,
         optional?: { 
             name: string; 
@@ -52,6 +58,124 @@ export class Site {
         }
 
     } 
+
+    private gotoReturnStatus(response) {
+        
+            
+            if(response.status() >= 200 && response.status() < 300) {
+                return PageStatus.OK;
+            } else if(response.status() >= 300 && response.status() < 400) {
+                return PageStatus.PERMISSION_ERROR;
+            } else if (response.status() >= 400 && response.status() < 500) {
+                return PageStatus.NOT_FOUND;
+            } else {
+                return PageStatus.SERVER_ERROR;
+            }
+    }
+    public async gotoMonitoringPage(): Promise<PageStatus> {
+        const url = `/server/${this.server.getServerId()}/site/${this.siteId}/monotoring`;
+        const response = await this.page.goto(url); 
+        
+        if(!response) {
+            throw new Error(`Url does not exists or server is down: ${url}`);
+        }
+
+        if(!this.page.url().includes(url))
+        {
+            console.log(`${url} is redirected to ${this.page.url()}`);
+        }
+
+        return this.gotoReturnStatus(response);
+        
+    }
+
+    public async gotoLogsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/logs`);
+    }
+
+    public async gotoEventsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/events`); 
+    }
+
+    public async gotoSiteOverviewPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/site-overview`); 
+    }
+
+    public async gotoGoLivePage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/staging_environment`); 
+    }
+
+    public async gotoSslHttpsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/ssl`); 
+    }
+    
+    public async gotoRedirectionPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/redirection`); 
+    }
+
+    public async gotoWpConfigPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/wp-config`); 
+    }
+
+    public async gotoUpdatesPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/updates`); 
+    }
+
+    public async gotoCachingPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/caching`); 
+    }
+    
+    public async gotoVulnerabilityScanPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/vulnerability-scan`); 
+    }
+
+    public async gotoEmailConfigurationPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/email-configuration`); 
+    }
+
+    public async gotoPreviousBackupPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/backups`); 
+    }
+
+    public async gotoBackupSettingsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/backup`); 
+    }
+
+    public async gotoSshSftpPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/ssh`); 
+    }
+
+    public async gotoDatabasePage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/database`); 
+    }
+
+    public async gotoFileManagerPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/file-manager`); 
+    }
+
+    public async gotoNginxAndSecurityPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/web-server-security`); 
+    }
+
+    public async gotoNginxCustomizationPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/nginx-customization`); 
+    }
+
+    public async gotoBasicAuthenticationPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/basic-authentication`); 
+    }
+
+    public async gotoCommandsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/commands`); 
+    }
+
+    public async gotoIpManagementPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/ip-management`); 
+    }
+
+    public async gotoSiteSettingsPage() {
+        await this.page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/settings`); 
+    }
 
 
     public async provisionSite(): Promise<boolean>
@@ -211,7 +335,15 @@ export class Site {
     }
 
     public async delete(page: Page) {
+        await page.goto(`/server/${this.server.getServerId()}/site/${this.siteId}/settings`);
+        await page.waitForURL(/.*settings/);
+        await page.waitForLoadState('domcontentloaded');
 
+        await page.getByRole('button', {name: 'Delete Site'}).click();
+        await page.waitForTimeout(2000);
+
+        await page.getByPlaceholder('Type site name to confirm').fill(this.name);
+        await page.getByRole('button', {name: 'Delete'}).click();
     }
 
 

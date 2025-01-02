@@ -90,7 +90,7 @@ export class Server {
      * @returns {Promise<boolean>} - Resolves to `true` if the server is successfully provisioned, otherwise `false`.
      * @throws {Error} - If an error occurs during server provisioning.
      */
-    async provisionServer(): Promise<boolean> {
+    private async provisionServer(): Promise<boolean> {
         try {
             console.log(this.serverProvider);
             // await page.goto('/server/create');
@@ -165,7 +165,7 @@ export class Server {
             fullObjectCaching?: boolean,
             objectCaching?: boolean,
         } 
-    ): Promise<number> {
+    ): Promise<Site | null > {
         
         const { phpVersion, wpVersion, fullObjectCaching, objectCaching } = options || {};
 
@@ -185,11 +185,18 @@ export class Server {
         if(await site.provisionSite())
         {
             this.sites.push(site);
-            return this.sites.length;
+            return site;
         }
-        return -1;
+
+        return null;
         
     }
+
+    getServerType()
+    {
+        return this.serverType;
+    }
+
 
     async delete()
     {
@@ -411,14 +418,36 @@ export class Server {
 
     }
 
+    async init() {
+        try {
+            if (this.serverId == null) {
+                // console.log("No server ID found, provisioning a new server...");
+                await this.provisionServer();
+            } else {
+                // console.log("Server ID found, loading server data...");
+                await this.loadData();
+            }
+    
+            // Validate that serverId is set
+            if (!this.serverId) {
+                throw new Error("Server initialization failed: serverId is not set.");
+            }
+    
+            console.log(`Server initialized with ID: ${this.serverId}`);
+            return this;
+        } catch (error) {
+            // console.error("Error during server initialization:", error);
+            throw error; // Ensure the calling code knows initialization failed
+        }
+    }
     /**
      * Loads server data by navigating to the server metadata page and extracting the server name.
      * Updates the `name` property with the server's name if successfully retrieved.
      * @throws Will log an error if the navigation or data extraction fails.
      * @async
      */
-    async loadData() {
-        if(this.serverId == null) return;
+    private async loadData() {
+        if(this.serverId == null) return this;
         try {
             await this.page.goto(`/server/${this.serverId}/meta`);
             const $serverName = this.page
@@ -426,9 +455,19 @@ export class Server {
                 .filter({ hasText: /^Server Name$/ })
                 .getByRole('textbox');
             this.name = await $serverName.inputValue();
+
+            if (await this.page.getByText('Openlitespeed').isVisible()) {
+                this.serverType = ServerType.openlitespeed;
+            } else {
+                this.serverType = ServerType.nginx;
+            }
+            // return this;
         } catch (error) {
             console.error('Failed to set server info:', error);
         }
+
+        return this;
+
     }
     
 }
