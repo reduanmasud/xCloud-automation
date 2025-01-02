@@ -80,6 +80,6 @@ test('Vulnerability Notifications Section', async() => {
     await expect.soft($elm.getByText('Enable this option to receive notifications about vulnerabilities via Email, Slack, and WhatsApp. Stay informed and take timely action to secure your systems')).toBeVisible();
 });
 
-test('Server Page Footer Test', async() => {
+test('Notification Page Footer Test', async() => {
     await expect.soft(page.getByText(/xCloud v\d+\.\d+\.\d+ Copyright © 2024 \| xCloud Hosting LLC\. All rights reserved\./)).toBeVisible();
 })
