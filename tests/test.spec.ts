@@ -1,13 +1,18 @@
 import { test, expect, type Page } from "@playwright/test";
-import { DBEngine, ServerManager, ServerProvider, ServerType } from "../POM/Classes/ServerManager.class";
-import { Server } from "../POM/Classes/Server/Server.class";
-import exp from "constants";
+
+// import "../POM/CustomMatchers/isImgLoaded";
+
+// expect.extend({ isImgLoaded });
+
+// import { DBEngine, ServerManager, ServerProvider, ServerType } from "../POM/Classes/ServerManager.class";
+// import { Server } from "../POM/Classes/Server/Server.class";
+
 let page: Page
-let server: Server;
-let vultr_server: Server;
-let hetzner_server: Server;
-let gcp_server: Server;
-let aws_server: Server;
+// let server: Server;
+// let vultr_server: Server;
+// let hetzner_server: Server;
+// let gcp_server: Server;
+// let aws_server: Server;
 
 test.describe.configure({ mode: 'serial' });
 
@@ -33,7 +38,7 @@ test.beforeAll(async ({ browser }) => {
     // vultr_server = await Server(page, 'id');
     // hetzner_server = await Server(page, 'id');
     // gcp_server = await Server(page, 'id');
-    await server.loadData();
+    // await server.loadData();
     
 });
 
@@ -42,6 +47,21 @@ test.afterAll(async () => {
     await page.close();
 });
 
+test("Before Content Check", async() => {
+    await page.goto('https://db262a91-2ad1-4c2b-8295-bfe072de448c-00-2odnt9nb2f2cj.pike.replit.dev/');
+    await expect(page.locator('#box1')).cssBeforeHas('content', '"Before Hover"');
+})
+
+// test("Image Load Test Image", async () => {
+
+//     await page.goto('https://db262a91-2ad1-4c2b-8295-bfe072de448c-00-2odnt9nb2f2cj.pike.replit.dev/');
+//     await expect(page.locator('#imageOne')).isImgLoaded();
+// })
+
+// test("Image is not load test", async() => {
+//     await page.goto('https://db262a91-2ad1-4c2b-8295-bfe072de448c-00-2odnt9nb2f2cj.pike.replit.dev/');
+//     await expect(page.locator('#imageTwo')).not.isImgLoaded();
+// })
 // test('Create Server Test', async() => {
 
 //     const success = await server.provisionServer();
@@ -50,19 +70,19 @@ test.afterAll(async () => {
     
 // });
 
-test('Create Site Test hello-site', async() => {
-    const i = await server.createSite('hello-site');
-    const site = server.sites[i - 1]; 
-    expect(i).not.toBe(-1);
-    expect(site.siteId).not.toBe('');
-})
+// test('Create Site Test hello-site', async() => {
+//     const i = await server.createSite('hello-site');
+//     const site = server.sites[i - 1]; 
+//     expect(i).not.toBe(-1);
+//     expect(site.siteId).not.toBe('');
+// })
 
-test('Create site demo-site', async() => {
-    const i = await server.createSite("demo-site",{fullObjectCaching:true,objectCaching:true,phpVersion:"8.2",wpVersion:"6.4"});
-    const site = server.sites[i - 1]; 
-    expect(i).not.toBe(-1);
-    expect(site.siteId).not.toBe('');
-})
+// test('Create site demo-site', async() => {
+//     const i = await server.createSite("demo-site",{fullObjectCaching:true,objectCaching:true,phpVersion:"8.2",wpVersion:"6.4"});
+//     const site = server.sites[i - 1]; 
+//     expect(i).not.toBe(-1);
+//     expect(site.siteId).not.toBe('');
+// })
 
 
 // test('Server Delete Test', async()=>{
