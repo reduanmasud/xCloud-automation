@@ -1,10 +1,11 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, expect } from '@playwright/test';
 import { baseConfig } from './config/config';
 import dotenv from 'dotenv';
+import { customMatchers } from './POM/CustomMatcher/customMatcher';
 
 
 dotenv.config();
-
+expect.extend(customMatchers);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
